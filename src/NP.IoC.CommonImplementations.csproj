@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\NP.DependencyInjection\src\NP.DependencyInjection.csproj" />
-    <ProjectReference Include="..\..\NP.Utilities\src\NP.Utilities.csproj" />
   </ItemGroup>
 
 </Project>

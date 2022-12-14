@@ -1,6 +1,5 @@
 ﻿using NP.DependencyInjection.Attributes;
 using NP.IoC.CommonImplementations;
-using NP.Utilities;
 using System.Reflection;
 
 namespace NP.IoC.CommonImplementations

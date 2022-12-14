@@ -9,8 +9,6 @@
 // Also, please, mention this software in any documentation for the 
 // products that use it.
 
-using NP.Utilities;
-
 namespace NP.IoC.CommonImplementations
 {
     public sealed class FullContainerItemResolvingKey
