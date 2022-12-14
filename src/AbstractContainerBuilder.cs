@@ -21,13 +21,13 @@ namespace NP.IoC.CommonImplementations
 
         public abstract void RegisterSingletonFactoryMethodInfo
         (
-            MethodInfo factoryMethodInfo,
+            MethodBase factoryMethodInfo,
             Type? resolvingType = null,
             object? resolutionKey = null);
 
         public abstract void RegisterFactoryMethodInfo
         (
-            MethodInfo factoryMethodInfo,
+            MethodBase factoryMethodInfo,
             Type? resolvingType = null,
             object? resolutionKey = null);
 
@@ -56,7 +56,7 @@ namespace NP.IoC.CommonImplementations
 
         public void RegisterFactoryMethodInfo<TResolving>
         (
-            MethodInfo factoryMethodInfo,
+            MethodBase factoryMethodInfo,
             object? resolutionKey = null)
         {
             RegisterFactoryMethodInfo(factoryMethodInfo, typeof(TResolving), resolutionKey);
@@ -64,11 +64,15 @@ namespace NP.IoC.CommonImplementations
 
         public void RegisterSingletonFactoryMethodInfo<TResolving>
         (
-            MethodInfo factoryMethodInfo,
+            MethodBase factoryMethodInfo,
             object? resolutionKey = null)
         {
             RegisterSingletonFactoryMethodInfo(factoryMethodInfo, typeof(TResolving), resolutionKey);
         }
+
+        protected abstract void RegisterAttributedType(Type resolvingType, Type typeToResolve, object? resolutionKey = null);
+
+        protected abstract void RegisterAttributedSingletonType(Type resolvingType, Type typeToResolve, object? resolutionKey = null);
 
 
         public void RegisterAttributedType(Type attributedType)
@@ -90,11 +94,11 @@ namespace NP.IoC.CommonImplementations
 
                 if (isSingleton)
                 {
-                    this.RegisterSingletonType(resolvingType, attributedType, resolutionKeyObj);
+                    this.RegisterAttributedSingletonType(resolvingType, attributedType, resolutionKeyObj);
                 }
                 else
                 {
-                    this.RegisterType(resolvingType, attributedType, resolutionKeyObj);
+                    this.RegisterAttributedType(resolvingType, attributedType, resolutionKeyObj);
                 }
             }
             else

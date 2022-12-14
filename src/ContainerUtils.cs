@@ -23,13 +23,27 @@ namespace NP.IoC.CommonImplementations
             return typeToResolveKey;
         }
 
-        public static Type GetAndCheckResolvingType(this MethodInfo factoryMethodInfo, Type? resolvingType = null)
+        public static Type GetMethodType(this MethodBase methodBase)
         {
-            Type typeToResolve = factoryMethodInfo.ReturnType;
+            if (methodBase is MethodInfo methodInfo)
+                return methodInfo.ReturnType;
+            else if (methodBase is ConstructorInfo constrInfo)
+            {
+                return constrInfo.DeclaringType;
+            }
+
+            return null;
+        }
+
+        public static Type GetAndCheckResolvingType(this MethodBase factoryMethodBase, Type? resolvingType = null)
+        {
+
+
+            Type typeToResolve = factoryMethodBase.GetMethodType();
 
             if (resolvingType == null)
             {
-                resolvingType = factoryMethodInfo.ReturnType;
+                resolvingType = factoryMethodBase.GetMethodType();
             }
             else
             {
@@ -83,15 +97,24 @@ namespace NP.IoC.CommonImplementations
             return GetTypeToResolveKey(paramInfo, paramInfo.ParameterType, false);
         }
 
-        public static object CreateAndComposeObjFromMethod(this AbstractContainer objectComposer, MethodInfo factoryMethodInfo)
+        public static object CreateAndComposeObjFromMethod(this AbstractContainer objectComposer, MethodBase factoryInfo)
         {
-            object[] args = objectComposer.GetMethodParamValues(factoryMethodInfo).ToArray()!;
+            object[] args = objectComposer.GetMethodParamValues(factoryInfo).ToArray()!;
 
-            object obj = factoryMethodInfo.Invoke(null, args)!;
+            object? obj = null;
 
-            objectComposer.ComposeObject(obj);
+            if (factoryInfo is MethodInfo factoryMethodInfo)
+            {
+                obj = factoryMethodInfo.Invoke(null, args);
+            }
+            else if (factoryInfo is ConstructorInfo constrInfo)
+            {
+                obj = constrInfo.Invoke(args);
+            }
 
-            return obj;
+            objectComposer.ComposeObject(obj!);
+
+            return obj!;
         }
 
         public static object CreateAndComposeObjFromType(this AbstractContainer objectComposer, Type resolvingType)

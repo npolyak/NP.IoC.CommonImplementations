@@ -4,7 +4,7 @@ namespace NP.IoC.CommonImplementations
 {
     public abstract class AbstractContainer
     {
-        protected abstract object ResolveKey(FullContainerItemResolvingKey fullResolvingKey);
+        protected abstract object? ResolveKey(FullContainerItemResolvingKey fullResolvingKey);
 
         // compose an object based in its properties' attributes
         public void ComposeObject(object obj)
@@ -21,7 +21,8 @@ namespace NP.IoC.CommonImplementations
                 if (propInfo.SetMethod == null)
                     continue;
 
-                FullContainerItemResolvingKey? propTypeToResolveKey = propInfo.GetTypeToResolveKey();
+                FullContainerItemResolvingKey? propTypeToResolveKey = 
+                    propInfo.GetTypeToResolveKey();
 
                 if (propTypeToResolveKey == null)
                 {
@@ -37,11 +38,12 @@ namespace NP.IoC.CommonImplementations
             }
         }
 
-        protected internal IEnumerable<object?> GetMethodParamValues(MethodBase constructorInfo)
+        protected internal IEnumerable<object?> GetMethodParamValues(MethodBase methodInfo)
         {
-            foreach (var paramInfo in constructorInfo.GetParameters())
+            foreach (var paramInfo in methodInfo.GetParameters())
             {
-                FullContainerItemResolvingKey? propTypeToResolveKey = paramInfo.GetTypeToResolveKey();
+                FullContainerItemResolvingKey? propTypeToResolveKey = 
+                    paramInfo.GetTypeToResolveKey();
 
                 if (propTypeToResolveKey == null)
                 {

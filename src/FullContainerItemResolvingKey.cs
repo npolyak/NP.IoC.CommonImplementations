@@ -13,7 +13,7 @@ using NP.Utilities;
 
 namespace NP.IoC.CommonImplementations
 {
-    public class FullContainerItemResolvingKey
+    public sealed class FullContainerItemResolvingKey
     {
         public Type ResolvingType { get; }
 
