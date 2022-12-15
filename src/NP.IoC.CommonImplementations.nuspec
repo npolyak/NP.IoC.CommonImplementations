@@ -2,15 +2,15 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>NP.IoC.CommonImplementations</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <title>NP.IoC.CommonImplementations</title>
     <authors>Nick Polyak, Ph. D.</authors>
     <license type="expression">MIT</license>
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <projectUrl>https://github.com/npolyak/NP.IoC.CommonImplementations</projectUrl>
-    <description>Common functionality for implementing adapters of IContainerBuilder and IContainer interfaces from NP.DependencyInjection package</description>
-    <summary>Common functionality for implementing adapters of IContainerBuilder and IContainer interfaces</summary>
-    <releaseNotes>Common functionality for implementing adapters of IContainerBuilder and IContainer interfaces</releaseNotes>
+    <description>Common functionality for implementing adaptors of IContainerBuilder and IContainer interfaces from NP.DependencyInjection package</description>
+    <summary>Common functionality for implementing adaptors of IContainerBuilder and IContainer interfaces</summary>
+    <releaseNotes>Common functionality for implementing adaptors of IContainerBuilder and IContainer interfaces</releaseNotes>
     <copyright>Nick Polyak 2022</copyright>
     <tags>DependencyInjection, IoC, DI</tags>
   </metadata>
