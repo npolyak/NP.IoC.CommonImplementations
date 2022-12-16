@@ -79,10 +79,15 @@ namespace NP.IoC.CommonImplementations
             RegisterTypeAttribute registerTypeAttribute =
                    attributedType.GetCustomAttribute<RegisterTypeAttribute>()!;
 
-            if (registerTypeAttribute == null)
+            if (registerTypeAttribute == null) 
             {
-                "Cannot call RegisterAttributedClass method on a type without RegisterTypeAttribute".ThrowProgError();
+                return;
             }
+
+            //if (registerTypeAttribute == null)
+            //{
+            //    "Cannot call RegisterAttributedClass method on a type without RegisterTypeAttribute".ThrowProgError();
+            //}
 
             if (registerTypeAttribute!.ResolvingType == null)
             {
@@ -112,8 +117,13 @@ namespace NP.IoC.CommonImplementations
 
             if (hasRegisterMethodAttribute == null)
             {
-                "Cannot call RegisterStaticMethodsFromClass method on a type without HasRegisterMethodsAttribute".ThrowProgError();
+                return;
             }
+
+            //if (hasRegisterMethodAttribute == null)
+            //{
+            //    "Cannot call RegisterStaticMethodsFromClass method on a type without HasRegisterMethodsAttribute".ThrowProgError();
+            //}
 
             foreach (var methodInfo in attributedType.GetMethods().Where(methodInfo => methodInfo.IsStatic))
             {
@@ -142,6 +152,7 @@ namespace NP.IoC.CommonImplementations
             foreach (Type resolvingType in assembly.GetExportedTypes())
             {
                 RegisterAttributedClass(resolvingType);
+                RegisterAttributedStaticFactoryMethodsFromClass(resolvingType);
             }
         }
 
