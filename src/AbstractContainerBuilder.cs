@@ -74,69 +74,74 @@ namespace NP.IoC.CommonImplementations
         protected abstract void RegisterAttributedSingletonType(Type resolvingType, Type typeToResolve, object? resolutionKey = null);
 
 
-        public void RegisterAttributedType(Type attributedType)
+        public void RegisterAttributedClass(Type attributedType)
         {
-            RegisterTypeAttribute implementsAttribute =
+            RegisterTypeAttribute registerTypeAttribute =
                    attributedType.GetCustomAttribute<RegisterTypeAttribute>()!;
 
-            if (implementsAttribute != null)
+            if (registerTypeAttribute == null)
             {
-                if (implementsAttribute.ResolvingType == null)
-                {
-                    implementsAttribute.ResolvingType =
-                        attributedType.GetBaseTypeOrFirstInterface() ?? throw new Exception($"IoCy Programming Error: Type {attributedType.FullName} has an 'Implements' attribute, but does not have any base type and does not implement any interfaces");
-                }
+                "Cannot call RegisterAttributedClass method on a type without RegisterTypeAttribute".ThrowProgError();
+            }
 
-                Type resolvingType = implementsAttribute.ResolvingType;
-                object? resolutionKeyObj = implementsAttribute.ResolutionKey;
-                bool isSingleton = implementsAttribute.IsSingleton;
+            if (registerTypeAttribute!.ResolvingType == null)
+            {
+                registerTypeAttribute.ResolvingType =
+                    attributedType.GetBaseTypeOrFirstInterface() ?? throw new Exception($"IoCy Programming Error: Type {attributedType.FullName} has an 'Implements' attribute, but does not have any base type and does not implement any interfaces");
+            }
 
-                if (isSingleton)
-                {
-                    this.RegisterAttributedSingletonType(resolvingType, attributedType, resolutionKeyObj);
-                }
-                else
-                {
-                    this.RegisterAttributedType(resolvingType, attributedType, resolutionKeyObj);
-                }
+            Type resolvingType = registerTypeAttribute.ResolvingType;
+            object? resolutionKeyObj = registerTypeAttribute.ResolutionKey;
+            bool isSingleton = registerTypeAttribute.IsSingleton;
+
+            if (isSingleton)
+            {
+                this.RegisterAttributedSingletonType(resolvingType, attributedType, resolutionKeyObj);
             }
             else
             {
-                HasRegisterMethodsAttribute? hasRegisterMethodAttribute =
-                    attributedType.GetCustomAttribute<HasRegisterMethodsAttribute>();
+                this.RegisterAttributedType(resolvingType, attributedType, resolutionKeyObj);
+            }
 
-                if (hasRegisterMethodAttribute != null)
+        }
+
+        public void RegisterAttributedStaticFactoryMethodsFromClass(Type attributedType)
+        {
+            HasRegisterMethodsAttribute? hasRegisterMethodAttribute =
+                attributedType.GetCustomAttribute<HasRegisterMethodsAttribute>();
+
+            if (hasRegisterMethodAttribute == null)
+            {
+                "Cannot call RegisterStaticMethodsFromClass method on a type without HasRegisterMethodsAttribute".ThrowProgError();
+            }
+
+            foreach (var methodInfo in attributedType.GetMethods().Where(methodInfo => methodInfo.IsStatic))
+            {
+                RegisterMethodAttribute? factoryMethodAttribute = methodInfo.GetAttr<RegisterMethodAttribute>();
+
+                if (factoryMethodAttribute != null)
                 {
-                    foreach (var methodInfo in attributedType.GetMethods().Where(methodInfo => methodInfo.IsStatic))
+                    Type resolvingType = factoryMethodAttribute.ResolvingType ?? methodInfo.ReturnType;
+                    object? partKeyObj = factoryMethodAttribute.ResolutionKey;
+                    bool isSingleton = factoryMethodAttribute.IsSingleton;
+
+                    if (isSingleton)
                     {
-                        RegisterMethodAttribute factoryMethodAttribute = methodInfo.GetAttr<RegisterMethodAttribute>();
-
-                        if (factoryMethodAttribute != null)
-                        {
-                            Type resolvingType = factoryMethodAttribute.ResolvingType ?? methodInfo.ReturnType;
-                            object? partKeyObj = factoryMethodAttribute.ResolutionKey;
-                            bool isSingleton = factoryMethodAttribute.IsSingleton;
-
-                            if (isSingleton)
-                            {
-                                this.RegisterSingletonFactoryMethodInfo(methodInfo, resolvingType, partKeyObj);
-                            }
-                            else
-                            {
-                                this.RegisterFactoryMethodInfo(methodInfo, resolvingType, partKeyObj);
-                            }
-                        }
+                        this.RegisterSingletonFactoryMethodInfo(methodInfo, resolvingType, partKeyObj);
+                    }
+                    else
+                    {
+                        this.RegisterFactoryMethodInfo(methodInfo, resolvingType, partKeyObj);
                     }
                 }
             }
         }
 
-
         public void RegisterAssembly(Assembly assembly)
         {
             foreach (Type resolvingType in assembly.GetExportedTypes())
             {
-                RegisterAttributedType(resolvingType);
+                RegisterAttributedClass(resolvingType);
             }
         }
 
@@ -146,8 +151,6 @@ namespace NP.IoC.CommonImplementations
                 throw new Exception($"There is no assembly at path '{assemblyPath}'");
 
             string absoluteAssemblyPath = Path.GetFullPath(assemblyPath);
-
-            //Assembly.ReflectionOnlyLoadFrom(absoluteAssemblyPath);
 
             Assembly loadedAssembly = Assembly.LoadFile(absoluteAssemblyPath);
 
