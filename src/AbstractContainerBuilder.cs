@@ -105,6 +105,8 @@ namespace NP.IoC.CommonImplementations
             {
                 return;
             }
+
+            RegisterAttributedClassImpl(attributedClass, registerTypeAttribute);
         }
 
         public void RegisterAttributedClass(Type attributedClass)
