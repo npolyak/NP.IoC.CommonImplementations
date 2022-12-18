@@ -8,8 +8,8 @@ namespace NP.IoC.CommonImplementations
     {
         public abstract void RegisterType
         (
-            Type resolvingType, 
-            Type typeToResolve, 
+            Type resolvingType,
+            Type typeToResolve,
             object? resolutionKey = null);
 
         public abstract void RegisterSingletonType
@@ -74,25 +74,12 @@ namespace NP.IoC.CommonImplementations
         protected abstract void RegisterAttributedSingletonType(Type resolvingType, Type typeToResolve, object? resolutionKey = null);
 
 
-        public void RegisterAttributedClass(Type attributedType)
+        private void RegisterAttributedClassImpl(Type attributedClass, RegisterTypeAttribute registerTypeAttribute)
         {
-            RegisterTypeAttribute registerTypeAttribute =
-                   attributedType.GetCustomAttribute<RegisterTypeAttribute>()!;
-
-            if (registerTypeAttribute == null) 
-            {
-                return;
-            }
-
-            //if (registerTypeAttribute == null)
-            //{
-            //    "Cannot call RegisterAttributedClass method on a type without RegisterTypeAttribute".ThrowProgError();
-            //}
-
             if (registerTypeAttribute!.ResolvingType == null)
             {
                 registerTypeAttribute.ResolvingType =
-                    attributedType.GetBaseTypeOrFirstInterface() ?? throw new Exception($"IoCy Programming Error: Type {attributedType.FullName} has an 'Implements' attribute, but does not have any base type and does not implement any interfaces");
+                    attributedClass.GetBaseTypeOrFirstInterface() ?? throw new Exception($"IoCy Programming Error: Type {attributedClass.FullName} has an 'Implements' attribute, but does not have any base type and does not implement any interfaces");
             }
 
             Type resolvingType = registerTypeAttribute.ResolvingType;
@@ -101,31 +88,42 @@ namespace NP.IoC.CommonImplementations
 
             if (isSingleton)
             {
-                this.RegisterAttributedSingletonType(resolvingType, attributedType, resolutionKeyObj);
+                this.RegisterAttributedSingletonType(resolvingType, attributedClass, resolutionKeyObj);
             }
             else
             {
-                this.RegisterAttributedType(resolvingType, attributedType, resolutionKeyObj);
+                this.RegisterAttributedType(resolvingType, attributedClass, resolutionKeyObj);
             }
-
         }
 
-        public void RegisterAttributedStaticFactoryMethodsFromClass(Type attributedType)
+        public void RegisterAttributedClassNoException(Type attributedClass)
         {
-            HasRegisterMethodsAttribute? hasRegisterMethodAttribute =
-                attributedType.GetCustomAttribute<HasRegisterMethodsAttribute>();
+            RegisterTypeAttribute registerTypeAttribute =
+                   attributedClass.GetCustomAttribute<RegisterTypeAttribute>()!;
 
-            if (hasRegisterMethodAttribute == null)
+            if (registerTypeAttribute == null)
             {
                 return;
             }
+        }
 
-            //if (hasRegisterMethodAttribute == null)
-            //{
-            //    "Cannot call RegisterStaticMethodsFromClass method on a type without HasRegisterMethodsAttribute".ThrowProgError();
-            //}
+        public void RegisterAttributedClass(Type attributedClass)
+        {
+            RegisterTypeAttribute registerTypeAttribute =
+                   attributedClass.GetCustomAttribute<RegisterTypeAttribute>()!;
 
-            foreach (var methodInfo in attributedType.GetMethods().Where(methodInfo => methodInfo.IsStatic))
+            if (registerTypeAttribute == null)
+            {
+                "Cannot call RegisterAttributedClass method on a type without RegisterTypeAttribute".ThrowProgError();
+            }
+
+            RegisterAttributedClassImpl(attributedClass, registerTypeAttribute);
+        }
+
+
+        private void RegisterAttributedStaticFactoryMethodsFromClassImpl(Type classWithStaticFactoryMethods)
+        {
+            foreach (var methodInfo in classWithStaticFactoryMethods.GetMethods().Where(methodInfo => methodInfo.IsStatic))
             {
                 RegisterMethodAttribute? factoryMethodAttribute = methodInfo.GetAttr<RegisterMethodAttribute>();
 
@@ -147,12 +145,38 @@ namespace NP.IoC.CommonImplementations
             }
         }
 
+        protected void RegisterAttributedStaticFactoryMethodsFromClassNoException(Type classWithStaticFactoryMethods)
+        {
+            HasRegisterMethodsAttribute? hasRegisterMethodAttribute =
+                classWithStaticFactoryMethods.GetCustomAttribute<HasRegisterMethodsAttribute>();
+
+            if (hasRegisterMethodAttribute == null)
+            {
+                return;
+            }
+
+            RegisterAttributedStaticFactoryMethodsFromClassImpl(classWithStaticFactoryMethods);
+        }
+
+        public void RegisterAttributedStaticFactoryMethodsFromClass(Type classWithStaticFactoryMethods)
+        {
+            HasRegisterMethodsAttribute? hasRegisterMethodAttribute =
+                classWithStaticFactoryMethods.GetCustomAttribute<HasRegisterMethodsAttribute>();
+
+            if (hasRegisterMethodAttribute == null)
+            {
+                "Cannot call RegisterStaticMethodsFromClass method on a type without HasRegisterMethodsAttribute".ThrowProgError();
+            }
+
+            RegisterAttributedStaticFactoryMethodsFromClassImpl(classWithStaticFactoryMethods);
+        }
+
         public void RegisterAssembly(Assembly assembly)
         {
             foreach (Type resolvingType in assembly.GetExportedTypes())
             {
-                RegisterAttributedClass(resolvingType);
-                RegisterAttributedStaticFactoryMethodsFromClass(resolvingType);
+                RegisterAttributedClassNoException(resolvingType);
+                RegisterAttributedStaticFactoryMethodsFromClassNoException(resolvingType);
             }
         }
 
