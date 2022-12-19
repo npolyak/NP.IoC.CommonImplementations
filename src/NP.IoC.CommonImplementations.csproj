@@ -11,4 +11,8 @@
 	  <None Remove="*.nuspec" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="$(SolutionDir)..\..\SubModules\NP.DependencyInjection\src\NP.DependencyInjection.csproj" />
+  </ItemGroup>
+
 </Project>
