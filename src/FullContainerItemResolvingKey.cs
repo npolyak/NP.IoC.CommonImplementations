@@ -11,17 +11,17 @@
 
 namespace NP.IoC.CommonImplementations
 {
-    public sealed class FullContainerItemResolvingKey
+    public sealed class FullContainerItemResolvingKey<TKey>
     {
         public Type ResolvingType { get; }
 
         // allows resolution by object 
         // without this, a single type would always be 
         // resolved in a single way. 
-        public object? KeyObject { get; }
+        public TKey? KeyObject { get; }
 
 
-        public FullContainerItemResolvingKey(Type resolvingType, object? keyObject)
+        public FullContainerItemResolvingKey(Type resolvingType, TKey keyObject)
         {
             this.ResolvingType = resolvingType;
             this.KeyObject = keyObject;
@@ -29,7 +29,7 @@ namespace NP.IoC.CommonImplementations
 
         public override bool Equals(object? obj)
         {
-            if (obj is FullContainerItemResolvingKey target)
+            if (obj is FullContainerItemResolvingKey<TKey> target)
             {
                 return this.ResolvingType.ObjEquals(target.ResolvingType) &&
                        this.KeyObject.ObjEquals(target.KeyObject);

@@ -4,50 +4,50 @@ using System.Text.RegularExpressions;
 
 namespace NP.IoC.CommonImplementations
 {
-    public abstract class AbstractContainerBuilder
+    public abstract class AbstractContainerBuilder<TKey>
     {
         public abstract void RegisterType
         (
             Type resolvingType,
             Type typeToResolve,
-            object? resolutionKey = null);
+            TKey resolutionKey = default);
 
         public abstract void RegisterSingletonType
         (
             Type resolvingType,
             Type typeToResolve,
-            object? resolutionKey = null);
+            TKey resolutionKey = default);
 
         public abstract void RegisterSingletonFactoryMethodInfo
         (
             MethodBase factoryMethodInfo,
             Type? resolvingType = null,
-            object? resolutionKey = null);
+            TKey resolutionKey = default);
 
         public abstract void RegisterFactoryMethodInfo
         (
             MethodBase factoryMethodInfo,
             Type? resolvingType = null,
-            object? resolutionKey = null);
+            TKey resolutionKey = default);
 
         public abstract void RegisterSingletonInstance(
             Type resolvingType,
             object instance,
-            object? resolutionKey = null);
+            TKey resolutionKey = default);
 
 
-        public void RegisterType<TResolving, TToResolve>(object? resolutionKey = null)
+        public void RegisterType<TResolving, TToResolve>(TKey resolutionKey = default)
             where TToResolve : TResolving
         {
             RegisterType(typeof(TResolving), typeof(TToResolve), resolutionKey);
         }
 
-        public void RegisterSingletonInstance<TResolving>(object instance, object? resolutionKey = null)
+        public void RegisterSingletonInstance<TResolving>(object instance, TKey resolutionKey = default)
         {
             RegisterSingletonInstance(typeof(TResolving), instance, resolutionKey);
         }
 
-        public void RegisterSingletonType<TResolving, TToResolve>(object? resolutionKey = null)
+        public void RegisterSingletonType<TResolving, TToResolve>(TKey resolutionKey = default)
             where TToResolve : TResolving
         {
             RegisterSingletonType(typeof(TResolving), typeof(TToResolve), resolutionKey);
@@ -56,7 +56,7 @@ namespace NP.IoC.CommonImplementations
         public void RegisterFactoryMethodInfo<TResolving>
         (
             MethodBase factoryMethodInfo,
-            object? resolutionKey = null)
+            TKey resolutionKey = default)
         {
             RegisterFactoryMethodInfo(factoryMethodInfo, typeof(TResolving), resolutionKey);
         }
@@ -64,14 +64,14 @@ namespace NP.IoC.CommonImplementations
         public void RegisterSingletonFactoryMethodInfo<TResolving>
         (
             MethodBase factoryMethodInfo,
-            object? resolutionKey = null)
+            TKey resolutionKey = default)
         {
             RegisterSingletonFactoryMethodInfo(factoryMethodInfo, typeof(TResolving), resolutionKey);
         }
 
-        protected abstract void RegisterAttributedType(Type resolvingType, Type typeToResolve, object? resolutionKey = null);
+        protected abstract void RegisterAttributedType(Type resolvingType, Type typeToResolve, TKey resolutionKey = default);
 
-        protected abstract void RegisterAttributedSingletonType(Type resolvingType, Type typeToResolve, object? resolutionKey = null);
+        protected abstract void RegisterAttributedSingletonType(Type resolvingType, Type typeToResolve, TKey resolutionKey = default);
 
 
         private void RegisterAttributedClassImpl(Type attributedClass, RegisterTypeAttribute registerTypeAttribute)
@@ -83,7 +83,7 @@ namespace NP.IoC.CommonImplementations
             }
 
             Type resolvingType = registerTypeAttribute.ResolvingType;
-            object? resolutionKeyObj = registerTypeAttribute.ResolutionKey;
+            TKey? resolutionKeyObj = (TKey?) registerTypeAttribute.ResolutionKey;
             bool isSingleton = registerTypeAttribute.IsSingleton;
 
             if (isSingleton)
@@ -132,7 +132,7 @@ namespace NP.IoC.CommonImplementations
                 if (factoryMethodAttribute != null)
                 {
                     Type resolvingType = factoryMethodAttribute.ResolvingType ?? methodInfo.ReturnType;
-                    object? partKeyObj = factoryMethodAttribute.ResolutionKey;
+                    TKey? partKeyObj = (TKey?) factoryMethodAttribute.ResolutionKey;
                     bool isSingleton = factoryMethodAttribute.IsSingleton;
 
                     if (isSingleton)

@@ -14,10 +14,10 @@ namespace NP.IoC.CommonImplementations
             }
         }
 
-        public static FullContainerItemResolvingKey ToKey(this Type typeToResolve, object? resolutionKey)
+        public static FullContainerItemResolvingKey<TKey> ToKey<TKey>(this Type typeToResolve, TKey resolutionKey)
         {
-            FullContainerItemResolvingKey typeToResolveKey =
-                new FullContainerItemResolvingKey(typeToResolve, resolutionKey);
+            FullContainerItemResolvingKey<TKey> typeToResolveKey =
+                new FullContainerItemResolvingKey<TKey>(typeToResolve, resolutionKey);
 
             return typeToResolveKey;
         }
@@ -52,7 +52,7 @@ namespace NP.IoC.CommonImplementations
             return resolvingType;
         }
 
-        public static FullContainerItemResolvingKey? GetTypeToResolveKey
+        public static FullContainerItemResolvingKey<TKey>? GetTypeToResolveKey<TKey>
         (
             this ICustomAttributeProvider propOrParam,
             Type propOrParamType,
@@ -83,20 +83,23 @@ namespace NP.IoC.CommonImplementations
 
             Type? realPropOrParamType = injectAttr.ResolvingType ?? propOrParamType;
 
-            return realPropOrParamType?.ToKey(injectAttr.ResolutionKey);
+            return realPropOrParamType?.ToKey((TKey?) injectAttr.ResolutionKey);
         }
 
-        public static FullContainerItemResolvingKey? GetTypeToResolveKey(this PropertyInfo propInfo)
+        public static FullContainerItemResolvingKey<TKey> GetTypeToResolveKey<TKey>(this PropertyInfo propInfo)
         {
-            return GetTypeToResolveKey(propInfo, propInfo.PropertyType);
+            return GetTypeToResolveKey<TKey>(propInfo, propInfo.PropertyType);
         }
 
-        public static FullContainerItemResolvingKey? GetTypeToResolveKey(this ParameterInfo paramInfo)
+        public static FullContainerItemResolvingKey<TKey> GetTypeToResolveKey<TKey>(this ParameterInfo paramInfo)
         {
-            return GetTypeToResolveKey(paramInfo, paramInfo.ParameterType, false);
+            return GetTypeToResolveKey<TKey>(paramInfo, paramInfo.ParameterType, false);
         }
 
-        public static object CreateAndComposeObjFromMethod(this AbstractContainer objectComposer, MethodBase factoryInfo)
+        public static object CreateAndComposeObjFromMethod
+        (
+            this IObjComposer objectComposer, 
+            MethodBase factoryInfo)
         {
             object[] args = objectComposer.GetMethodParamValues(factoryInfo).ToArray()!;
 
@@ -116,7 +119,10 @@ namespace NP.IoC.CommonImplementations
             return obj!;
         }
 
-        public static object CreateAndComposeObjFromType(this AbstractContainer objectComposer, Type resolvingType)
+        public static object CreateAndComposeObjFromType
+        (
+            this IObjComposer objectComposer, 
+            Type resolvingType)
         {
             object? obj;
             ConstructorInfo constructorInfo =

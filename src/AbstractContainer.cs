@@ -2,9 +2,9 @@
 
 namespace NP.IoC.CommonImplementations
 {
-    public abstract class AbstractContainer
+    public abstract class AbstractContainer<TKey> : IObjComposer
     {
-        protected abstract object? ResolveKey(FullContainerItemResolvingKey fullResolvingKey);
+        protected abstract object? ResolveKey(FullContainerItemResolvingKey<TKey> fullResolvingKey);
 
         // compose an object based in its properties' attributes
         public void ComposeObject(object obj)
@@ -21,8 +21,8 @@ namespace NP.IoC.CommonImplementations
                 if (propInfo.SetMethod == null)
                     continue;
 
-                FullContainerItemResolvingKey? propTypeToResolveKey = 
-                    propInfo.GetTypeToResolveKey();
+                FullContainerItemResolvingKey<TKey>? propTypeToResolveKey = 
+                    propInfo.GetTypeToResolveKey<TKey>();
 
                 if (propTypeToResolveKey == null)
                 {
@@ -38,12 +38,12 @@ namespace NP.IoC.CommonImplementations
             }
         }
 
-        protected internal IEnumerable<object?> GetMethodParamValues(MethodBase methodInfo)
+        public IEnumerable<object?> GetMethodParamValues(MethodBase methodInfo)
         {
             foreach (var paramInfo in methodInfo.GetParameters())
             {
-                FullContainerItemResolvingKey? propTypeToResolveKey = 
-                    paramInfo.GetTypeToResolveKey();
+                FullContainerItemResolvingKey<TKey>? propTypeToResolveKey = 
+                    paramInfo.GetTypeToResolveKey<TKey>();
 
                 if (propTypeToResolveKey == null)
                 {
@@ -55,21 +55,21 @@ namespace NP.IoC.CommonImplementations
         }
 
 
-        public object Resolve(Type resolvingType, object? resolutionKey = null)
+        public object Resolve(Type resolvingType, TKey resolutionKey = default)
         {
-            FullContainerItemResolvingKey resolvingTypeKey = resolvingType.ToKey(resolutionKey);
+            FullContainerItemResolvingKey<TKey> resolvingTypeKey = resolvingType.ToKey(resolutionKey);
 
             return ResolveKey(resolvingTypeKey);
         }
 
-        private object ResolveImpl<TResolving>(object? resolutionKey)
+        private object ResolveImpl<TResolving>(TKey resolutionKey)
         {
             Type resolvingType = typeof(TResolving);
 
             return Resolve(resolvingType, resolutionKey);
         }
 
-        public TToResolve Resolve<TToResolve>(object? resolutionKey = null)
+        public TToResolve Resolve<TToResolve>(TKey resolutionKey = default)
         {
             return (TToResolve)ResolveImpl<TToResolve>(resolutionKey);
         }
