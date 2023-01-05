@@ -36,8 +36,6 @@ namespace NP.IoC.CommonImplementations
 
         public static Type GetAndCheckResolvingType(this MethodBase factoryMethodBase, Type? resolvingType = null)
         {
-
-
             Type typeToResolve = factoryMethodBase.GetMethodType();
 
             if (resolvingType == null)
