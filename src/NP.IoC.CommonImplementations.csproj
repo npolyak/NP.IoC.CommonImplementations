@@ -4,6 +4,14 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<Title>NP.DependencyInjection</Title>
+		<Authors>Nick Polyak, Ph. D.</Authors>
+		<Version>1.0.7</Version>
+		<Copyright>Nick Polyak 2023</Copyright>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Description>Common functionality for implementing adaptors of IContainerBuilder and IContainer interfaces</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>DependencyInjection, IoC, DI</PackageTags>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DebugType>none</DebugType>
@@ -13,8 +21,11 @@
 		<None Remove="*.nuspec" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<ProjectReference Include="$(SolutionDir)..\..\SubModules\NP.DependencyInjection\src\NP.DependencyInjection.csproj" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<PackageReference Include="NP.DependencyInjection" Version="1.0.7"/>
+	</ItemGroup>
 </Project>
