@@ -50,7 +50,7 @@ namespace NP.IoC.CommonImplementations
         }
 
 
-        public static bool ObjEquals(this object obj1, object obj2)
+        public static bool ObjEquals(this object? obj1, object? obj2)
         {
             if (obj1 == obj2)
                 return true;

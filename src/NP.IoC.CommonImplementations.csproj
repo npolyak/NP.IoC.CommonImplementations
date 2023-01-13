@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<Title>NP.DependencyInjection</Title>
 		<Authors>Nick Polyak, Ph. D.</Authors>
-		<Version>1.0.7</Version>
+		<Version>1.0.8</Version>
 		<Copyright>Nick Polyak 2023</Copyright>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Description>Common functionality for implementing adaptors of IContainerBuilder and IContainer interfaces</Description>
@@ -26,6 +26,6 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
-		<PackageReference Include="NP.DependencyInjection" Version="1.0.7" />
+		<PackageReference Include="NP.DependencyInjection" Version="1.0.8" />
 	</ItemGroup>
 </Project>

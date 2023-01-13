@@ -22,7 +22,8 @@ namespace NP.IoC.CommonImplementations
         (
             MethodBase factoryMethodInfo,
             Type? resolvingType = null,
-            TKey resolutionKey = default);
+            TKey resolutionKey = default,
+            bool isMultiCell = false);
 
         public abstract void RegisterFactoryMethodInfo
         (
@@ -71,7 +72,12 @@ namespace NP.IoC.CommonImplementations
 
         protected abstract void RegisterAttributedType(Type resolvingType, Type typeToResolve, TKey resolutionKey = default);
 
-        protected abstract void RegisterAttributedSingletonType(Type resolvingType, Type typeToResolve, TKey resolutionKey = default);
+        protected abstract void RegisterAttributedSingletonType
+        (
+            Type resolvingType, 
+            Type typeToResolve, 
+            TKey resolutionKey = default,
+            bool isMultiCell = false);
 
 
         private void RegisterAttributedClassImpl(Type attributedClass, RegisterTypeAttribute registerTypeAttribute)
@@ -85,10 +91,11 @@ namespace NP.IoC.CommonImplementations
             Type resolvingType = registerTypeAttribute.ResolvingType;
             TKey? resolutionKeyObj = (TKey?) registerTypeAttribute.ResolutionKey;
             bool isSingleton = registerTypeAttribute.IsSingleton;
+            bool isMultiCell = registerTypeAttribute.IsMultiCell;
 
             if (isSingleton)
             {
-                this.RegisterAttributedSingletonType(resolvingType, attributedClass, resolutionKeyObj);
+                this.RegisterAttributedSingletonType(resolvingType, attributedClass, resolutionKeyObj, isMultiCell);
             }
             else
             {
@@ -134,10 +141,11 @@ namespace NP.IoC.CommonImplementations
                     Type resolvingType = factoryMethodAttribute.ResolvingType ?? methodInfo.ReturnType;
                     TKey? partKeyObj = (TKey?) factoryMethodAttribute.ResolutionKey;
                     bool isSingleton = factoryMethodAttribute.IsSingleton;
+                    bool isMultiCell = factoryMethodAttribute.IsMultiCell;
 
                     if (isSingleton)
                     {
-                        this.RegisterSingletonFactoryMethodInfo(methodInfo, resolvingType, partKeyObj);
+                        this.RegisterSingletonFactoryMethodInfo(methodInfo, resolvingType, partKeyObj, isMultiCell);
                     }
                     else
                     {
