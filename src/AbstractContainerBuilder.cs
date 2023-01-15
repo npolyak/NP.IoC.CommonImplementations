@@ -18,13 +18,6 @@ namespace NP.IoC.CommonImplementations
             Type typeToResolve,
             TKey resolutionKey = default);
 
-        public abstract void RegisterSingletonFactoryMethodInfo
-        (
-            MethodBase factoryMethodInfo,
-            Type? resolvingType = null,
-            TKey resolutionKey = default,
-            bool isMultiCell = false);
-
         public abstract void RegisterFactoryMethodInfo
         (
             MethodBase factoryMethodInfo,
@@ -36,6 +29,20 @@ namespace NP.IoC.CommonImplementations
             object instance,
             TKey resolutionKey = default);
 
+        public abstract void RegisterSingletonFactoryMethodInfo
+        (
+            MethodBase factoryMethodInfo,
+            Type? resolvingType = null,
+            TKey resolutionKey = default);
+
+        public virtual void RegisterMultiCellFactoryMethodInfo
+        (
+            MethodBase factoryMethodInfo,
+            Type cellType,
+            TKey resolutionKey = default)
+        {
+
+        }
 
         public void RegisterType<TResolving, TToResolve>(TKey resolutionKey = default)
             where TToResolve : TResolving
@@ -67,35 +74,77 @@ namespace NP.IoC.CommonImplementations
             MethodBase factoryMethodInfo,
             TKey resolutionKey = default)
         {
-            RegisterSingletonFactoryMethodInfo(factoryMethodInfo, typeof(TResolving), resolutionKey);
+            RegisterSingletonFactoryMethodInfo
+            (
+                factoryMethodInfo, 
+                typeof(TResolving), 
+                resolutionKey);
         }
 
-        protected abstract void RegisterAttributedType(Type resolvingType, Type typeToResolve, TKey resolutionKey = default);
+        protected abstract void RegisterAttributedType
+        (
+            Type resolvingType, 
+            Type typeToResolve, 
+            TKey resolutionKey = default);
 
         protected abstract void RegisterAttributedSingletonType
         (
             Type resolvingType, 
             Type typeToResolve, 
-            TKey resolutionKey = default,
-            bool isMultiCell = false);
+            TKey resolutionKey = default);
 
-
-        private void RegisterAttributedClassImpl(Type attributedClass, RegisterTypeAttribute registerTypeAttribute)
+        protected virtual void RegisterAttributedMultiCellType
+        (
+            Type cellType,
+            Type typeToResolve,
+            TKey resolutionKey = default)
         {
-            if (registerTypeAttribute!.ResolvingType == null)
+
+        }
+
+
+        private void RegisterAttributedClassImpl(Type attributedClass, bool exceptionIfNull)
+        {
+            RegisterTypeAttribute registerTypeAttribute =
+                   attributedClass.GetCustomAttribute<RegisterTypeAttribute>()!;
+
+            if (registerTypeAttribute == null)
             {
-                registerTypeAttribute.ResolvingType =
+                if (exceptionIfNull)
+                {
+                    "Cannot call RegisterAttributedClass method on a type without RegisterTypeAttribute".ThrowProgError();
+                }
+
+                return;
+            }
+
+            Type? resolvingType = registerTypeAttribute.ResolvingType;
+            if (resolvingType == null)
+            {
+                resolvingType =
                     attributedClass.GetBaseTypeOrFirstInterface() ?? throw new Exception($"IoCy Programming Error: Type {attributedClass.FullName} has an 'Implements' attribute, but does not have any base type and does not implement any interfaces");
             }
 
-            Type resolvingType = registerTypeAttribute.ResolvingType;
             TKey? resolutionKeyObj = (TKey?) registerTypeAttribute.ResolutionKey;
-            bool isSingleton = registerTypeAttribute.IsSingleton;
             bool isMultiCell = registerTypeAttribute.IsMultiCell;
-
-            if (isSingleton)
+            bool isSingleton = registerTypeAttribute.IsSingleton;
+            
+            if (isMultiCell)
             {
-                this.RegisterAttributedSingletonType(resolvingType, attributedClass, resolutionKeyObj, isMultiCell);
+                this.RegisterAttributedMultiCellType
+                (
+                    registerTypeAttribute.CellType,
+                    attributedClass,
+                    resolutionKeyObj
+                );
+            }
+            else if (isSingleton)
+            {
+                this.RegisterAttributedSingletonType
+                (
+                    resolvingType, 
+                    attributedClass, 
+                    resolutionKeyObj);
             }
             else
             {
@@ -105,33 +154,30 @@ namespace NP.IoC.CommonImplementations
 
         public void RegisterAttributedClassNoException(Type attributedClass)
         {
-            RegisterTypeAttribute registerTypeAttribute =
-                   attributedClass.GetCustomAttribute<RegisterTypeAttribute>()!;
-
-            if (registerTypeAttribute == null)
-            {
-                return;
-            }
-
-            RegisterAttributedClassImpl(attributedClass, registerTypeAttribute);
+            RegisterAttributedClassImpl(attributedClass, false);
         }
 
         public void RegisterAttributedClass(Type attributedClass)
         {
-            RegisterTypeAttribute registerTypeAttribute =
-                   attributedClass.GetCustomAttribute<RegisterTypeAttribute>()!;
-
-            if (registerTypeAttribute == null)
-            {
-                "Cannot call RegisterAttributedClass method on a type without RegisterTypeAttribute".ThrowProgError();
-            }
-
-            RegisterAttributedClassImpl(attributedClass, registerTypeAttribute);
+            RegisterAttributedClassImpl(attributedClass, true);
         }
 
 
-        private void RegisterAttributedStaticFactoryMethodsFromClassImpl(Type classWithStaticFactoryMethods)
+        private void RegisterAttributedStaticFactoryMethodsFromClassImpl(Type classWithStaticFactoryMethods, bool exceptionIfNull)
         {
+            HasRegisterMethodsAttribute? hasRegisterMethodAttribute =
+                classWithStaticFactoryMethods.GetCustomAttribute<HasRegisterMethodsAttribute>();
+
+            if (hasRegisterMethodAttribute == null)
+            {
+                if (exceptionIfNull)
+                {
+                    "Cannot call RegisterStaticMethodsFromClass method on a type without HasRegisterMethodsAttribute".ThrowProgError();
+                }
+
+                return;
+            }
+
             foreach (var methodInfo in classWithStaticFactoryMethods.GetMethods().Where(methodInfo => methodInfo.IsStatic))
             {
                 RegisterMethodAttribute? factoryMethodAttribute = methodInfo.GetAttr<RegisterMethodAttribute>();
@@ -142,14 +188,31 @@ namespace NP.IoC.CommonImplementations
                     TKey? partKeyObj = (TKey?) factoryMethodAttribute.ResolutionKey;
                     bool isSingleton = factoryMethodAttribute.IsSingleton;
                     bool isMultiCell = factoryMethodAttribute.IsMultiCell;
+                    Type cellType = factoryMethodAttribute.CellType!;
 
-                    if (isSingleton)
+                    if (isMultiCell)
                     {
-                        this.RegisterSingletonFactoryMethodInfo(methodInfo, resolvingType, partKeyObj, isMultiCell);
+                        this.RegisterMultiCellFactoryMethodInfo
+                        (
+                            methodInfo,
+                            cellType,
+                            partKeyObj);
+                    }
+                    else if (isSingleton)
+                    {
+                        this.RegisterSingletonFactoryMethodInfo
+                        (
+                            methodInfo, 
+                            resolvingType, 
+                            partKeyObj);
                     }
                     else
                     {
-                        this.RegisterFactoryMethodInfo(methodInfo, resolvingType, partKeyObj);
+                        this.RegisterFactoryMethodInfo
+                        (
+                            methodInfo, 
+                            resolvingType, 
+                            partKeyObj);
                     }
                 }
             }
@@ -157,28 +220,21 @@ namespace NP.IoC.CommonImplementations
 
         protected void RegisterAttributedStaticFactoryMethodsFromClassNoException(Type classWithStaticFactoryMethods)
         {
-            HasRegisterMethodsAttribute? hasRegisterMethodAttribute =
-                classWithStaticFactoryMethods.GetCustomAttribute<HasRegisterMethodsAttribute>();
 
-            if (hasRegisterMethodAttribute == null)
-            {
-                return;
-            }
-
-            RegisterAttributedStaticFactoryMethodsFromClassImpl(classWithStaticFactoryMethods);
+            RegisterAttributedStaticFactoryMethodsFromClassImpl
+            (
+                classWithStaticFactoryMethods, 
+                false);
         }
 
-        public void RegisterAttributedStaticFactoryMethodsFromClass(Type classWithStaticFactoryMethods)
+        public void RegisterAttributedStaticFactoryMethodsFromClass
+        (
+            Type classWithStaticFactoryMethods)
         {
-            HasRegisterMethodsAttribute? hasRegisterMethodAttribute =
-                classWithStaticFactoryMethods.GetCustomAttribute<HasRegisterMethodsAttribute>();
-
-            if (hasRegisterMethodAttribute == null)
-            {
-                "Cannot call RegisterStaticMethodsFromClass method on a type without HasRegisterMethodsAttribute".ThrowProgError();
-            }
-
-            RegisterAttributedStaticFactoryMethodsFromClassImpl(classWithStaticFactoryMethods);
+            RegisterAttributedStaticFactoryMethodsFromClassImpl
+            (
+                classWithStaticFactoryMethods, 
+                true);
         }
 
         public void RegisterAssembly(Assembly assembly)
