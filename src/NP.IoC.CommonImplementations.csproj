@@ -4,7 +4,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Title>NP.DependencyInjection</Title>
 		<Authors>Nick Polyak, Ph. D.</Authors>
-		<Version>1.0.9</Version>
+		<Version>1.0.10</Version>
 		<Copyright>Nick Polyak 2023</Copyright>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Description>Common functionality for implementing adaptors of IContainerBuilder and IContainer interfaces</Description>
