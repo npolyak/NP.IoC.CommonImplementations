@@ -24,6 +24,6 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
-		<PackageReference Include="NP.DependencyInjection" Version="1.0.9" />
+		<PackageReference Include="NP.DependencyInjection" Version="1.0.10" />
 	</ItemGroup>
 </Project>
