@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Title>NP.DependencyInjection</Title>
+		<Title>NP.CommonImplementations</Title>
 		<Authors>Nick Polyak, Ph. D.</Authors>
 		<Version>1.0.10</Version>
 		<Copyright>Nick Polyak 2023</Copyright>
